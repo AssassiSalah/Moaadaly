@@ -59,6 +59,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public boolean moduleExists(String name) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_MODULE + " WHERE " + COLUMN_NAME + "=?", new String[]{name});
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        return exists;
+    }
+
+
     // Insert a Module_Only_Exame
     public void addModule(Module_Only_Exame module, int id) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -139,15 +148,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
+            // Fetch column indexes
+            int nameIndex = cursor.getColumnIndexOrThrow(COLUMN_NAME);
+            int coufIndex = cursor.getColumnIndexOrThrow(COLUMN_COUF);
+            int credIndex = cursor.getColumnIndexOrThrow(COLUMN_CRED);
+            int examNoteIndex = cursor.getColumnIndexOrThrow(COLUMN_EXAM_NOTE);
+            int tdExistIndex = cursor.getColumnIndexOrThrow(COLUMN_TD_EXIST);
+            int tpExistIndex = cursor.getColumnIndexOrThrow(COLUMN_TP_EXIST);
+
+            int tdNoteIndex = cursor.getColumnIndexOrThrow(COLUMN_TD_NOTE);
+            int tdPercentIndex = cursor.getColumnIndexOrThrow(COLUMN_TD_PERCENT);
+            int tpNoteIndex = cursor.getColumnIndexOrThrow(COLUMN_TP_NOTE);
+            int tpPercentIndex = cursor.getColumnIndexOrThrow(COLUMN_TP_PERCENT);
             do {
                 try {
-                    // Fetch column indexes
-                    int nameIndex = cursor.getColumnIndexOrThrow(COLUMN_NAME);
-                    int coufIndex = cursor.getColumnIndexOrThrow(COLUMN_COUF);
-                    int credIndex = cursor.getColumnIndexOrThrow(COLUMN_CRED);
-                    int examNoteIndex = cursor.getColumnIndexOrThrow(COLUMN_EXAM_NOTE);
-                    int tdExistIndex = cursor.getColumnIndexOrThrow(COLUMN_TD_EXIST);
-                    int tpExistIndex = cursor.getColumnIndexOrThrow(COLUMN_TP_EXIST);
 
                     // Fetch common fields for Module_Only_Exame
                     String name = cursor.getString(nameIndex);
@@ -159,10 +173,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
                     // Check if it’s a Module_With_TD_TP
                     if (tdExist && tpExist) {
-                        float tdNote = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_TD_NOTE));
-                        float tdPercent = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_TD_PERCENT));
-                        float tpNote = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_TP_NOTE));
-                        float tpPercent = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_TP_PERCENT));
+                        float tdNote = cursor.getFloat(tdNoteIndex);
+                        float tdPercent = cursor.getFloat(tdPercentIndex);
+                        float tpNote = cursor.getFloat(tpNoteIndex);
+                        float tpPercent = cursor.getFloat(tpPercentIndex);
 
                         // Create a Module_With_TD_TP object
                         Module_With_TD_TP moduleWithTDTP = new Module_With_TD_TP(name, couf, cred, tdPercent, tpPercent);
@@ -174,8 +188,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                         moduleList.add(moduleWithTDTP);
                     } else {
                         if (tdExist) {
-                            float tdNote = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_TD_NOTE));
-                            float tdPercent = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_TD_PERCENT));
+                            float tdNote = cursor.getFloat(tdNoteIndex);
+                            float tdPercent = cursor.getFloat(tdPercentIndex);
 
                             // Create a Module_With_TD object
                             Module_With_TD moduleWithTD = new Module_With_TD(name, couf, cred, tdPercent);
@@ -186,8 +200,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                             moduleList.add(moduleWithTD);
                         } else {
                             if (tpExist) {
-                                float tpNote = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_TP_NOTE));
-                                float tpPercent = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_TP_PERCENT));
+                                float tpNote = cursor.getFloat(tpNoteIndex);
+                                float tpPercent = cursor.getFloat(tpPercentIndex);
 
                                 // Create a Module_With_TP object
                                 Module_With_TP moduleWithTP = new Module_With_TP(name, couf, cred, tpPercent);
@@ -218,10 +232,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return moduleList;
     }
 
-    public void editModule(int id, Module_Only_Exame module) {
+    public void updateModuleByName(Module_Only_Exame module, int idSave) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_ID_SAVE, -1);//TODO for now
+
+        values.put(COLUMN_ID_SAVE, idSave);//TODO for now
         values.put(COLUMN_NAME, module.getName_Module());
         values.put(COLUMN_COUF, module.getCouf());
         values.put(COLUMN_CRED, module.getCred());
@@ -245,7 +260,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         // Update the database
-        db.update(TABLE_MODULE, values, COLUMN_ID + "=?", new String[]{String.valueOf(id)});
+        db.update(TABLE_MODULE, values, COLUMN_NAME + "=?", new String[]{module.getName_Module()});
         db.close();
     }
 
@@ -256,11 +271,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void reCreateTable() {
+        dropTable();
+        createTableIfNotExists();
+    }
+
+    public void dropTable() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MODULE);
+        db.close();
+    }
+
     public void createTableIfNotExists() {
         SQLiteDatabase db = this.getWritableDatabase();
         String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_MODULE + " ("
                 + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + COLUMN_ID_SAVE + " INTEGER UNIQUE, " // Ensuring COLUMN_ID_SAVE is unique
+                + COLUMN_ID_SAVE + " INTEGER, " // Ensuring COLUMN_ID_SAVE is unique
                 + COLUMN_NAME + " TEXT, "
                 + COLUMN_COUF + " INTEGER, "
                 + COLUMN_CRED + " INTEGER, "
@@ -273,12 +299,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + COLUMN_TP_PERCENT + " REAL"
                 + ")";
         db.execSQL(CREATE_TABLE);
-        db.close();
-    }
-
-    public void dropTable() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MODULE);
         db.close();
     }
 }

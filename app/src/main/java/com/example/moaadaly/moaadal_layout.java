@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -42,33 +41,30 @@ public class moaadal_layout extends AppCompatActivity {
 
         // Accessing TextViews
         TextView nameSpeciality = findViewById(R.id.Name_Speciality);
-        nameSpeciality.setText("M1 IA"); // Example: Set new text
+        String nameofSpeciality = "M1 IA";
+        nameSpeciality.setText(nameofSpeciality); // Example: Set new text
 
         TextView nameSaves = findViewById(R.id.Name_Saves);
-        nameSaves.setText("Current Note");
+        String nameSaved = "Current_Note";
+        nameSaves.setText(nameSaved);
 
         TextView semesterNumber = findViewById(R.id.Semaster_Number);
-        semesterNumber.setText("S1");
-
-        makeSpace();
+        String semester = "S1";
+        semesterNumber.setText(semester);
 
         database = new DatabaseHandler(this);
-        //database.dropTable();
-        //database.createTableIfNotExists();
-        //modules_list = database.getAllModules();//getModuleListDatabase();
-        modules_list = getModuleList();
-        modules_Moyan = new ArrayList<>();
-        for (Module_Only_Exame module : modules_list)
-            test(module);
 
-        //database.dropTable();
+        //database.reCreateTable();
+
+        load(null);
     }
 
+    //HACK
     private ArrayList<Module_Only_Exame> getModuleList() {
         ArrayList<Module_Only_Exame> modules = new ArrayList<>();
         modules.add(new Module_With_TD_TP("AAP",3, 6,0.25f,0.25f));
         modules.add(new Module_With_TD_TP("SD",3, 6,0.25f,0.25f));
-        modules.add(new Module_With_TP("RC",3, 6,0.5f));
+        modules.add(new Module_With_TP("RC",3, 6,0.33f));
         modules.add(new Module_With_TD_TP("ISD",2, 4,0.25f,0.25f));
         modules.add(new Module_With_TP("AA",2, 4,0.5f));
         modules.add(new Module_Only_Exame("ENG",1, 2));
@@ -76,30 +72,28 @@ public class moaadal_layout extends AppCompatActivity {
         return modules;
     }
 
-    private void test(Module_Only_Exame module) {
-
+    private void createTableRows() {
         // Accessing TableLayout and TableRow
         TableLayout tableLayout = findViewById(R.id.Table_Layout); // Add this id if missing from XML
 
         // Add the row to the table layout
-        tableLayout.addView(getTableRow(module));
+        for (Module_Only_Exame module : modules_list) {
+            TextView moyan = new TextView(this);
+            modules_Moyan.add(moyan);
+            tableLayout.addView(createRow(module, moyan));
 
-        makeSpace();
-    }
-
-    private void makeSpace() {
-        TableLayout tableLayout = findViewById(R.id.Table_Layout);
-
-        tableLayout.addView(new View(this) {{
-            setLayoutParams(new TableRow.LayoutParams(
-                    TableRow.LayoutParams.MATCH_PARENT,
-                    (int) (20 * getResources().getDisplayMetrics().density)
-            ));
-        }});
+            //Make 20dp Space
+            tableLayout.addView(new View(this) {{
+                setLayoutParams(new TableRow.LayoutParams(
+                        TableRow.LayoutParams.MATCH_PARENT,
+                        (int) (20 * getResources().getDisplayMetrics().density)
+                ));
+            }});
+        }
     }
 
     @NonNull
-    private TableRow getTableRow(Module_Only_Exame module) {
+    private TableRow createRow(Module_Only_Exame module, TextView moyan) {
         TableRow tableRow = new TableRow(this);
 
         // Add dynamic rows to the table
@@ -115,7 +109,7 @@ public class moaadal_layout extends AppCompatActivity {
         credit.setText(String.valueOf(module.getCred()));
         tableRow.addView(credit);
 
-        EditText td = createEditText();
+        EditText td = createEditTextDecimal();
         td.setTag("TD_" + module.getName_Module()); // Assign a unique tag
         td.addTextChangedListener(getTextWatcher(td)); // Add TextWatcher
         if(module instanceof Module_With_TD) {
@@ -133,7 +127,7 @@ public class moaadal_layout extends AppCompatActivity {
             }
 
 
-        EditText tp = createEditText();
+        EditText tp = createEditTextDecimal();
         tp.setTag("TP_" + module.getName_Module()); // Assign a unique tag
         tp.addTextChangedListener(getTextWatcher(tp)); // Add TextWatcher
         if(module instanceof Module_With_TP) {
@@ -150,42 +144,35 @@ public class moaadal_layout extends AppCompatActivity {
                 tableRow.addView(empty);
             }
 
-        EditText exam = createEditText();
+        EditText exam = createEditTextDecimal();
         exam.setTag("Exam_" + module.getName_Module()); // Assign a unique tag
         exam.addTextChangedListener(getTextWatcher(exam)); // Add TextWatcher
 
         exam.setText(module.getExam_Note_String());
-
         tableRow.addView(exam);
 
-        TextView moyan = new TextView(this);
         moyan.setText(String.valueOf(calculateMoyan(module)));
         tableRow.addView(moyan);
-
-        modules_Moyan.add(moyan);
 
         return tableRow;
     }
 
     @NonNull
-    private EditText createEditText() {
+    private EditText createEditTextDecimal() {
         EditText editTextDecimal = new EditText(this);
 
         editTextDecimal.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
         // Apply an InputFilter to restrict the input format
         editTextDecimal.setFilters(new InputFilter[] {
-                new InputFilter() {
-                    @Override
-                    public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                        String input = dest.toString() + source.toString();
+                (source, start, end, dest, d_start, d_end) -> { // new InputFilter()
+                    String input = dest.toString() + source.toString();
 
-                        // Regular expression to match XX.XX format
-                        if (input.matches("^\\d{0,2}(\\.\\d{0,2})?$")) {
-                            return null; // Accept the input
-                        }
-                        return ""; // Reject the input
+                    // Regular expression to match XX.XX format
+                    if (input.matches("^\\d{0,2}(\\.\\d{0,2})?$")) {
+                        return null; // Accept the input
                     }
+                    return ""; // Reject the input
                 }
         });
 
@@ -219,7 +206,7 @@ public class moaadal_layout extends AppCompatActivity {
                 if(module == null)
                     return;
 
-                updatTheValue(module, tag, newValue);
+                updateTheValue(module, tag, newValue);
                 int index = modules_list.indexOf(module);
                 if(modules_list.size() <= index || modules_Moyan.size() <= index)
                     return;
@@ -256,7 +243,7 @@ public class moaadal_layout extends AppCompatActivity {
         }
     }
 
-    private void updatTheValue(Module_Only_Exame module, String tag, String newValueString) {
+    private void updateTheValue(Module_Only_Exame module, String tag, String newValueString) {
         float newValue;
 
         if(newValueString.isEmpty())
@@ -324,18 +311,21 @@ public class moaadal_layout extends AppCompatActivity {
                 , module.getExam_Note());
     }
 
-    private float calculateMoyan(float T, float T_persent, float exam) {
+    private float calculateMoyan(float T, float T_percent, float exam) {
         // Approximate To Two Decimal Places
-        return Math.round((T * T_persent + exam * (1 - T_persent)) * 100) / 100.0f;
+        return Math.round((T * T_percent + exam * (1 - T_percent)) * 100) / 100.0f;
     }
 
-    private float calculateMoyan(float TD, float TD_persent, float TP, float TP_persent, float exam) {
+    private float calculateMoyan(float TD, float TD_percent, float TP, float TP_percent, float exam) {
         // Approximate To Two Decimal Places
-        return Math.round((TD * TD_persent + TP * TP_persent + exam * (1 - TD_persent - TP_persent)) * 100) / 100.0f;
+        return Math.round((TD * TD_percent + TP * TP_percent + exam * (1 - TD_percent - TP_percent)) * 100) / 100.0f;
     }
 
     private void calculateMoyanTotal() {
-        //chatgbt comblite this
+        if (modules_list.size() != modules_Moyan.size()) {
+            Log.e("Error", "Mismatch: modules_list=" + modules_list.size() + ", modules_Moyan=" + modules_Moyan.size());
+            return; // Prevent crash
+        }
         float moyan_total = 0.0f;
         float couf_total = 0;
         for(Module_Only_Exame module : modules_list) {
@@ -345,32 +335,43 @@ public class moaadal_layout extends AppCompatActivity {
             couf_total += module.getCouf();
             moyanTextView.setText(String.valueOf(moyan_local));
         }
-        Log.d("dbb", "Moyan Total: " + moyan_total + " , Couf Total: " + couf_total + " ,the / of the total: " + (moyan_total / couf_total) + " , the round value: " + (Math.round(moyan_total / couf_total) * 100 / 100.0f));
+        Log.d("dbb", "Moyan Total: " + moyan_total + " , couf Total: " + couf_total + " ,the / of the total: " + (moyan_total / couf_total) + " , the round value: " + (Math.round(moyan_total / couf_total) * 100 / 100.0f));
         TextView moyan = findViewById(R.id.Moyan);
         moyan.setText(String.valueOf(moyan_total / couf_total));
     }
 
+    public void load(View view) {
+        TableLayout tableLayout = findViewById(R.id.Table_Layout);
+        tableLayout.removeAllViews(); // Clear old data before loading new ones
+
+        modules_list = database.getAllModules();
+
+        if(modules_list.isEmpty())
+            modules_list = getModuleList();
+
+        modules_Moyan = new ArrayList<>();
+        createTableRows();
+
+        Toast.makeText(this, "Load Complete", Toast.LENGTH_LONG).show();
+    }
     public void save(View view) {
-        /*
         int id = 1;
-        for(Module_Only_Exame m : modules_list) {
-            if(m instanceof Module_With_TD_TP)
-                database.addModuleWithTDTP((Module_With_TD_TP) m, id);
-            else {
-                if (m instanceof Module_With_TD)
+        for (Module_Only_Exame m : modules_list) {
+            if (database.moduleExists(m.getName_Module())) {
+                database.updateModuleByName(m, 1); // Update instead of inserting
+            } else {
+                if (m instanceof Module_With_TD_TP)
+                    database.addModuleWithTDTP((Module_With_TD_TP) m, id);
+                else if (m instanceof Module_With_TD)
                     database.addModuleWithTD((Module_With_TD) m, id);
-                else {
-                    if (m instanceof Module_With_TP)
-                        database.addModuleWithTP((Module_With_TP) m, id);
-                    else
-                        database.addModule(m, id);
-                }
+                else if (m instanceof Module_With_TP)
+                    database.addModuleWithTP((Module_With_TP) m, id);
+                else
+                    database.addModule(m, id);
             }
             Log.d("Mod", "--> " + m);
         }
         Toast.makeText(this, "Save Complete", Toast.LENGTH_LONG).show();
-
-         */
-        Toast.makeText(this, "This Not Working For Now", Toast.LENGTH_LONG).show();
     }
+
 }
