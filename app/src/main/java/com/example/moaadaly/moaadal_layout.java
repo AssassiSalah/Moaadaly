@@ -55,8 +55,8 @@ public class moaadal_layout extends AppCompatActivity {
         database = new DatabaseHandler(this);
         //database.dropTable();
         //database.createTableIfNotExists();
-        modules_list = database.getAllModules();//getModuleListDatabase();
-        //modules_list = getModuleList();
+        //modules_list = database.getAllModules();//getModuleListDatabase();
+        modules_list = getModuleList();
         modules_Moyan = new ArrayList<>();
         for (Module_Only_Exame module : modules_list)
             test(module);
@@ -351,6 +351,7 @@ public class moaadal_layout extends AppCompatActivity {
     }
 
     public void save(View view) {
+        /*
         int id = 1;
         for(Module_Only_Exame m : modules_list) {
             if(m instanceof Module_With_TD_TP)
@@ -368,5 +369,8 @@ public class moaadal_layout extends AppCompatActivity {
             Log.d("Mod", "--> " + m);
         }
         Toast.makeText(this, "Save Complete", Toast.LENGTH_LONG).show();
+
+         */
+        Toast.makeText(this, "This Not Working For Now", Toast.LENGTH_LONG).show();
     }
 }
