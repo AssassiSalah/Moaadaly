@@ -2,4 +2,28 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="blue">#00224D</color>
+    <color name="blueBar">#FFDDB2</color>
+    <color name="header">#3E9FEC</color>
+    <color name="primary_color">#B3A0A6B3</color>
+    <color name="selected_button">#FF424242</color>
+
+    <color name="td">#FFD200</color>
+    <color name="tp">#FF6F00</color>
+    <color name="coure">#FF03DAC5</color>
+    <color name="workShop">#34F109</color>
+
+    <color name="red">#F10909</color>
+    <color name="green">#34F109</color>
+    <color name="yellow">#F1DA09</color>
+    <color name="orange">#F15A09</color>
+    <color name="gray">#B3B0B0</color>
+    <color name="right_color">#FF03DAC5</color>
+    <color name="left_color">#F1DA09</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3708B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="lavender">#8692f7</color>
 </resources>

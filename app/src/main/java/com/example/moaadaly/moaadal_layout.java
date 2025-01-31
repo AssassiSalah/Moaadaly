@@ -1,5 +1,6 @@
 package com.example.moaadaly;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -60,6 +61,7 @@ public class moaadal_layout extends AppCompatActivity {
     }
 
     //HACK
+    @NonNull
     private ArrayList<Module_Only_Exame> getModuleList() {
         ArrayList<Module_Only_Exame> modules = new ArrayList<>();
         modules.add(new Module_With_TD_TP("AAP",3, 6,0.25f,0.25f));
@@ -79,6 +81,8 @@ public class moaadal_layout extends AppCompatActivity {
         // Add the row to the table layout
         for (Module_Only_Exame module : modules_list) {
             TextView moyan = new TextView(this);
+            moyan.setTextColor(Color.WHITE);
+
             modules_Moyan.add(moyan);
             tableLayout.addView(createRow(module, moyan));
 
@@ -99,19 +103,23 @@ public class moaadal_layout extends AppCompatActivity {
         // Add dynamic rows to the table
         TextView moduleName = new TextView(this);
         moduleName.setText(module.getName_Module());
+        moduleName.setTextColor(Color.WHITE);
         tableRow.addView(moduleName);
 
         TextView coefficient = new TextView(this);
         coefficient.setText(String.valueOf(module.getCouf()));
+        coefficient.setTextColor(Color.WHITE);
         tableRow.addView(coefficient);
 
         TextView credit = new TextView(this);
         credit.setText(String.valueOf(module.getCred()));
+        credit.setTextColor(Color.WHITE);
         tableRow.addView(credit);
 
         EditText td = createEditTextDecimal();
         td.setTag("TD_" + module.getName_Module()); // Assign a unique tag
         td.addTextChangedListener(getTextWatcher(td)); // Add TextWatcher
+        td.setTextColor(Color.WHITE);
         if(module instanceof Module_With_TD) {
             td.setText(((Module_With_TD) module).getTD_Note_String());
             tableRow.addView(td);
@@ -123,6 +131,7 @@ public class moaadal_layout extends AppCompatActivity {
                 // No Need For Edit Text
                 TextView empty = new TextView(this);
                 empty.setText("N/A");
+                empty.setTextColor(Color.WHITE);
                 tableRow.addView(empty);
             }
 
@@ -130,6 +139,7 @@ public class moaadal_layout extends AppCompatActivity {
         EditText tp = createEditTextDecimal();
         tp.setTag("TP_" + module.getName_Module()); // Assign a unique tag
         tp.addTextChangedListener(getTextWatcher(tp)); // Add TextWatcher
+        tp.setTextColor(Color.WHITE);
         if(module instanceof Module_With_TP) {
             tp.setText(((Module_With_TP) module).getTP_Note_String());
             tableRow.addView(tp);
@@ -141,6 +151,7 @@ public class moaadal_layout extends AppCompatActivity {
                 // No Need For Edit Text
                 TextView empty = new TextView(this);
                 empty.setText("N/A");
+                empty.setTextColor(Color.WHITE);
                 tableRow.addView(empty);
             }
 
@@ -149,6 +160,7 @@ public class moaadal_layout extends AppCompatActivity {
         exam.addTextChangedListener(getTextWatcher(exam)); // Add TextWatcher
 
         exam.setText(module.getExam_Note_String());
+        exam.setTextColor(Color.WHITE);
         tableRow.addView(exam);
 
         moyan.setText(String.valueOf(calculateMoyan(module)));
