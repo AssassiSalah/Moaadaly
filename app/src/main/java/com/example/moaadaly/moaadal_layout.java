@@ -206,6 +206,11 @@ public class moaadal_layout extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+                if (s.length() > 0 && s.toString().equals("0.0")) {
+                    s.clear(); // Remove "0.0" when user starts typing
+                    return;
+                }
+
                 String tag = (String) editText.getTag();
                 String nameModule = tag.split("_")[1];
                 String newValue = s.toString();

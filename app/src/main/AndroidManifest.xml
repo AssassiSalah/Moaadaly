@@ -11,7 +11,7 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/icons8_medium_old_96"
         android:label="@string/app_name"
-        android:supportsRtl="true"
+        android:supportsRtl="false"
         android:theme="@style/Theme.Moaadaly"
         tools:targetApi="26">
         <activity

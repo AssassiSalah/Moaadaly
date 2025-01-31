@@ -14,6 +14,7 @@
         android:paddingLeft="20dp"
         android:paddingTop="30dp"
         android:paddingRight="20dp"
+        android:layoutDirection="ltr"
         android:background="@drawable/background_app">
 
 
@@ -29,7 +30,8 @@
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/orange"
                 android:onClick="load"
-                android:text="@string/load" />
+                android:text="@string/load"
+                android:textColor="@color/white" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -43,7 +45,8 @@
                     android:layout_height="wrap_content"
                     android:backgroundTint="@color/blue"
                     android:onClick="save"
-                    android:text="@string/save" />
+                    android:text="@string/save"
+                    android:textColor="@color/white" />
 
             </LinearLayout>
 
